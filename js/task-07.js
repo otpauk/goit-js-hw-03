@@ -29,8 +29,9 @@ const account = {
    */
   createTransaction(amount, type) {
     const newTransaction = {
-      AMOUNT: amount,
-      TYPE: type,
+      idTransaction: this.transactions.length + 1,
+      amountTransaction: amount,
+      typeTransaction: type,
     };
 
     return newTransaction;
@@ -45,9 +46,9 @@ const account = {
   deposit(amount) {
     this.balance += amount;
 
-    // this.transactions.push(this.createTransaction(amount, type));
+    this.transactions.push(this.createTransaction(amount, Transaction.DEPOSIT));
 
-    return this.balance;
+    return this.transactions;
   },
 
   /*
@@ -56,28 +57,70 @@ const account = {
    * Вызывает createTransaction для создания объекта транзакции
    * после чего добавляет его в историю транзакций.
    *
-   * Если amount больше чем текущий баланс, выводи сообщение
+   * Если amount больше чем текущий баланс, выводит сообщение
    * о том, что снятие такой суммы не возможно, недостаточно средств.
    */
-  withdraw(amount) {},
+  withdraw(amount) {
+    if (amount <= this.balance) {
+      this.balance -= amount;
+    } else {
+      return `снятие такой суммы не возможно, недостаточно средств!\n${this.getBalance()}`;
+    }
+
+    this.transactions.push(
+      this.createTransaction(amount, Transaction.WITHDRAW),
+    );
+
+    return this.transactions;
+  },
 
   /*
    * Метод возвращает текущий баланс
    */
-  getBalance() {},
+  getBalance() {
+    return `текущий баланс: ${this.balance}`;
+  },
 
   /*
    * Метод ищет и возвращает объект транзации по id
    */
-  getTransactionDetails(id) {},
+  getTransactionDetails(id) {
+    let transactionDetails = ``;
+
+    for (const [key, value] of Object.entries(this.transactions[id - 1])) {
+      transactionDetails += `${key}: ${value}\n`;
+    }
+
+    return transactionDetails;
+  },
 
   /*
    * Метод возвращает количество средств
    * определенного типа транзакции из всей истории транзакций
    */
-  getTransactionTotal(type) {},
+  getTransactionTotal(type) {
+    let transactionTotal = 0;
+
+    for (const transaction of this.transactions) {
+      if (transaction.typeTransaction === type) {
+        transactionTotal += transaction.amountTransaction;
+      }
+    }
+
+    return transactionTotal;
+  },
 };
 
-console.log(account.createTransaction(500, 'deposit'));
 console.log(account.deposit(500));
-console.log(account);
+console.log(account.getBalance());
+console.log(account.deposit(700));
+console.log(account.getBalance());
+console.log(account.deposit(900));
+console.log(account.getBalance());
+console.log(account.withdraw(100));
+console.log(account.getBalance());
+console.log(account.withdraw(10000));
+console.log(account.getTransactionDetails(3));
+console.log(account.getTransactionDetails(4));
+console.log(account.getTransactionTotal('deposit'));
+console.log(account.getTransactionTotal('withdraw'));
